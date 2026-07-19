@@ -12,7 +12,6 @@ services:
       CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}"
       PROXIED: false
       DOMAINS: >
-        ${ACTUAL_BUDGET_HOSTNAME},
         ${ADDON_MANAGER_HOSTNAME},
         ${ADGUARD_HOSTNAME},
         ${AIOLISTS_HOSTNAME},
@@ -57,6 +56,7 @@ services:
         ${JELLYFIN_HOSTNAME},
         ${KARAKEEP_HOSTNAME},
         ${LIBRESPEED_HOSTNAME},
+        ${MAILLE_HOSTNAME},
         ${MEALIE_HOSTNAME},
         ${MEDIAFLOW_PROXY_HOSTNAME},
         ${MEDIAFUSION_HOSTNAME},
@@ -91,10 +91,6 @@ services:
         ${STREMIO_AI_COMPANION_HOSTNAME},
         ${STREMIO_AI_SEARCH_HOSTNAME},
         ${STREMIO_CATALOG_PROVIDERS_HOSTNAME},
-        ${STREMIO_JACKETT_HOSTNAME},
-        ${STREMIO_LETTERBOXD_HOSTNAME},
-        ${STREMIO_SERVER_HOSTNAME},
-        ${STREMIO_STREAMING_CATALOGS_HOSTNAME},
         ${STREMIO_TRAKT_ADDON_HOSTNAME},
         ${STREMTHRU_HOSTNAME},
         ${SYNCIO_HOSTNAME},
@@ -103,8 +99,6 @@ services:
         ${TAUTULLI_HOSTNAME},
         ${THE_LOUNGE_HOSTNAME},
         ${TMDB_ADDON_HOSTNAME},
-        ${TMDB_COLLECTIONS_HOSTNAME},
-        ${TORBOX_MANAGER_HOSTNAME},
         ${TRAEFIK_HOSTNAME},
         ${TULIPROX_HOSTNAME},
         ${UPTIME_KUMA_HOSTNAME},
@@ -116,9 +110,9 @@ services:
         ${WUD_HOSTNAME},
         ${XRDB_HOSTNAME},
         ${YAMTRACK_HOSTNAME},
+        ${ZAPCLONE_HOSTNAME},
         ${ZILEAN_HOSTNAME},
-        ${ZIPLINE_HOSTNAME},
-        ${ZURG_HOSTNAME}
+        ${ZIPLINE_HOSTNAME}
     profiles:
       - cloudflare-ddns
       - all

@@ -1,0 +1,43 @@
+services:
+  nocodb_postgres:
+    image: postgres:16-alpine
+    container_name: nocodb_postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ${DOCKER_DATA_DIR}/nocodb/db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nocodb} -d ${POSTGRES_DB:-nocodb}"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - nocodb
+      - all
+
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: nocodb
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      TZ: ${TZ:-UTC}
+    expose:
+      - 8080
+    volumes:
+      - ${DOCKER_DATA_DIR}/nocodb/app:/usr/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nocodb.rule=Host(`${NOCODB_HOSTNAME?}`)"
+      - "traefik.http.routers.nocodb.entrypoints=websecure"
+      - "traefik.http.routers.nocodb.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.nocodb.middlewares=authelia@docker"
+      - "traefik.http.services.nocodb.loadbalancer.server.port=8080"
+    depends_on:
+      nocodb_postgres:
+        condition: service_healthy
+    profiles:
+      - nocodb
+      - all

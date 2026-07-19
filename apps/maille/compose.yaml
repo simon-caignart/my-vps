@@ -1,0 +1,68 @@
+services:
+  maille_postgres:
+    image: postgres:16-alpine
+    container_name: maille_postgres
+    profiles: ["maille"]
+    restart: unless-stopped
+    environment:
+      TZ: "${TZ}"
+      POSTGRES_USER: maille
+      POSTGRES_PASSWORD: "${MAILLE_DB_PASSWORD?}"
+      POSTGRES_DB: maille
+    volumes:
+      - "${DOCKER_DATA_DIR}/maille/db:/var/lib/postgresql/data"
+    ports:
+      - "127.0.0.1:${MAILLE_DB_PORT?}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maille -d maille"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  maille_server:
+    image: ghcr.io/simon-caignart/suivi-ca-server:latest
+    container_name: maille_server
+    profiles: ["maille"]
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    env_file: .env
+    environment:
+      TZ: "${TZ}"
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: "postgres://maille:${MAILLE_DB_PASSWORD?}@maille_postgres:5432/maille"
+    depends_on:
+      maille_postgres:
+        condition: service_healthy
+    networks:
+      - my-vps-network
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.maille-api.rule: "Host(`${MAILLE_HOSTNAME?}`) && PathPrefix(`/api`)"
+      traefik.http.routers.maille-api.entrypoints: "web,websecure"
+      traefik.http.routers.maille-api.tls.certresolver: "letsencrypt"
+      traefik.http.routers.maille-api.priority: "10"
+      traefik.http.routers.maille-api.middlewares: "maille-api-stripprefix"
+      traefik.http.middlewares.maille-api-stripprefix.stripprefix.prefixes: "/api"
+      traefik.http.services.maille-api.loadbalancer.server.port: "3000"
+
+  maille_client:
+    image: ghcr.io/simon-caignart/suivi-ca-client:latest
+    container_name: maille_client
+    profiles: ["maille"]
+    restart: unless-stopped
+    environment:
+      TZ: "${TZ}"
+    networks:
+      - my-vps-network
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.maille-web.rule: "Host(`${MAILLE_HOSTNAME?}`)"
+      traefik.http.routers.maille-web.entrypoints: "web,websecure"
+      traefik.http.routers.maille-web.tls.certresolver: "letsencrypt"
+      traefik.http.routers.maille-web.priority: "1"
+      traefik.http.services.maille-web.loadbalancer.server.port: "80"
+
+networks:
+  my-vps-network:
+    external: true

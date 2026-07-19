@@ -48,3 +48,6 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+
+# Env files (already tracked ones stay tracked; this only affects new ones)
+.env*

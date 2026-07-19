@@ -1,0 +1,49 @@
+services:
+  zapclone:
+    container_name: 'zapclone'
+    image: 'ghcr.io/simon-caignart/zapclone:sha-c6105dd'
+    restart: 'unless-stopped'
+    user: $PUID:$PGID
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres-zapclone:${ZAPCLONE_DB_PASSWORD?}@zapclone_postgres:5432/zapclone?schema=public
+      SHOPIFY_API_KEY: ${SHOPIFY_API_KEY?}
+      SHOPIFY_API_SECRET: ${SHOPIFY_API_SECRET?}
+      SHOPIFY_APP_URL: ${SHOPIFY_APP_URL?}
+      SCOPES: ${ZAPCLONE_SCOPES?}
+      SHOPIFY_BILLING_TEST: ${SHOPIFY_BILLING_TEST?}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zapclone.rule=Host(`${ZAPCLONE_HOSTNAME?}`)"
+      - "traefik.http.routers.zapclone.entryPoints=web,websecure"
+      - "traefik.http.routers.zapclone.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zapclone.loadbalancer.server.port=3000"
+    depends_on:
+      zapclone_postgres:
+        condition: service_healthy
+    profiles:
+      - zapclone
+      - all
+
+  zapclone_postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    container_name: zapclone_postgres
+    volumes:
+      - ${DOCKER_DATA_DIR}/zapclone/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres-zapclone
+      POSTGRES_PASSWORD: ${ZAPCLONE_DB_PASSWORD?}
+      POSTGRES_DB: zapclone
+    ports:
+      - "127.0.0.1:5432:5432"      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres-zapclone -d zapclone"]
+      start_period: 1m
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - zapclone
+      - all

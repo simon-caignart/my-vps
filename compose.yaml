@@ -51,11 +51,13 @@ include:
   - apps/karakeep/compose.yaml
   - apps/kometa/compose.yaml
   - apps/librespeed/compose.yaml
+  - apps/maille/compose.yaml
   - apps/mealie/compose.yaml
   - apps/mediaflow-proxy/compose.yaml
   - apps/mediafusion/compose.yaml
   - apps/minecraft/compose.yaml
   - apps/nitter/compose.yaml
+  - apps/nocodb/compose.yaml
   - apps/notifiarr/compose.yaml
   - apps/ntfy/compose.yaml
   - apps/nzbdav/compose.yaml
@@ -114,10 +116,11 @@ include:
   - apps/wud/compose.yaml
   - apps/xrdb/compose.yaml
   - apps/yamtrack/compose.yaml
+  - apps/zapclone/compose.yaml
   - apps/zilean/compose.yaml
   - apps/zipline/compose.yaml
   # If you would like to use wests scripts, which include blackhole and repair, uncomment the line below.
-  # It is recommended you use decypharr instead, however. 
+  # It is recommended you use decypharr instead, however.
   # - apps/wests-scripts/compose.yaml
   # Uncomment if you are using zurg and comment out decypharr
   # There is also a way to use both together, but it requires 2 rclone instances

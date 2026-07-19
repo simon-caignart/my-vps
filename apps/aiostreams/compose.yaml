@@ -13,6 +13,7 @@ services:
       - "traefik.http.routers.aiostreams.entrypoints=websecure"
       - "traefik.http.routers.aiostreams.tls.certresolver=letsencrypt"
       - "traefik.http.routers.aiostreams.middlewares=authelia@docker"
+      - "com.centurylinklabs.watchtower.monitor-only=true"
     volumes:
       - ${DOCKER_DATA_DIR}/aiostreams:/app/data
     profiles:
