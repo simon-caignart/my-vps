@@ -59,6 +59,9 @@ services:
       BACKUP_FILENAME: "maille-db-%Y-%m-%dT%H-%M-%S.tar.gz"
       BACKUP_SOURCES: /dumps
       BACKUP_RETENTION_DAYS: "30"
+      # Notify on every run, not just failures, so a healthy backup pings the
+      # Kuma push monitor (silence, not just an explicit failure, alerts us).
+      NOTIFICATION_LEVEL: info
       AWS_S3_BUCKET_NAME: "${MAILLE_BACKUP_B2_BUCKET?}"
       AWS_ENDPOINT: "${MAILLE_BACKUP_B2_ENDPOINT?}"
       AWS_ACCESS_KEY_ID: "${MAILLE_BACKUP_B2_KEY_ID?}"
