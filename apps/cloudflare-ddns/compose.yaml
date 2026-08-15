@@ -113,6 +113,11 @@ services:
         ${ZAPCLONE_HOSTNAME},
         ${ZILEAN_HOSTNAME},
         ${ZIPLINE_HOSTNAME}
+        ${DOZZLE_HOSTNAME},
+        ${HONEY_HOSTNAME},
+        ${DASHDOT_HOSTNAME},
+        ${ZAPCLONE_HOSTNAME},
+        ${MAILLE_HOSTNAME}
     profiles:
       - cloudflare-ddns
       - all

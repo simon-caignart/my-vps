@@ -119,6 +119,7 @@ include:
   - apps/zapclone/compose.yaml
   - apps/zilean/compose.yaml
   - apps/zipline/compose.yaml
+  - apps/maille/compose.yaml
   # If you would like to use wests scripts, which include blackhole and repair, uncomment the line below.
   # It is recommended you use decypharr instead, however.
   # - apps/wests-scripts/compose.yaml
