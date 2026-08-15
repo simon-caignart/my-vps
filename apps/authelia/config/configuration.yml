@@ -809,6 +809,13 @@ access_control:
         - '^/api.*$'
         - '^/events.*$'
 
+    ## Uptime Kuma push monitor endpoint bypasses authentication so backup
+    ## containers (and other push-based heartbeats) can ping it unauthenticated.
+    - domain: '{{ env "TEMPLATE_UPTIME_KUMA_HOSTNAME" }}'
+      resources:
+        - '^/api/push/.*$'
+      policy: 'bypass'
+
     ## XRDB image and proxy endpoints bypass authentication for media clients
     - domain: '{{ env "TEMPLATE_XRDB_HOSTNAME" }}'
       resources:
