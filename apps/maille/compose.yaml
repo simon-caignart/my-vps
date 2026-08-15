@@ -19,6 +19,55 @@ services:
       timeout: 3s
       retries: 20
 
+  # Daily pg_dump into a local volume, connects over the network (no docker
+  # socket needed). Keeps a short local rotation; offsite copy + alerting is
+  # handled by maille_backup_offsite below.
+  maille_backup_dump:
+    image: prodrigestivill/postgres-backup-local:16
+    container_name: maille_backup_dump
+    profiles: ["maille"]
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    environment:
+      TZ: "${TZ}"
+      POSTGRES_HOST: maille_postgres
+      POSTGRES_DB: maille
+      POSTGRES_USER: maille
+      POSTGRES_PASSWORD: "${MAILLE_DB_PASSWORD?}"
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: "7"
+      BACKUP_KEEP_WEEKS: "0"
+      BACKUP_KEEP_MONTHS: "0"
+      HEALTHCHECK_PORT: "8080"
+    volumes:
+      - maille_db_dumps:/backups
+    depends_on:
+      maille_postgres:
+        condition: service_healthy
+
+  # Ships the local dumps to Backblaze B2 (S3-compatible, free tier) and
+  # pings the Uptime Kuma push monitor so a missed/failed backup alerts us.
+  maille_backup_offsite:
+    image: offen/docker-volume-backup:v2
+    container_name: maille_backup_offsite
+    profiles: ["maille"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      BACKUP_CRON: "0 4 * * *"
+      BACKUP_FILENAME: "maille-db-%Y-%m-%dT%H-%M-%S.tar.gz"
+      BACKUP_SOURCES: /dumps
+      BACKUP_RETENTION_DAYS: "30"
+      AWS_S3_BUCKET_NAME: "${MAILLE_BACKUP_B2_BUCKET?}"
+      AWS_ENDPOINT: "${MAILLE_BACKUP_B2_ENDPOINT?}"
+      AWS_ACCESS_KEY_ID: "${MAILLE_BACKUP_B2_KEY_ID?}"
+      AWS_SECRET_ACCESS_KEY: "${MAILLE_BACKUP_B2_APP_KEY?}"
+      NOTIFICATION_URLS: "generic+${MAILLE_BACKUP_KUMA_PUSH_URL?}"
+    volumes:
+      - maille_db_dumps:/dumps:ro
+    depends_on:
+      - maille_backup_dump
+
   maille_server:
     image: ghcr.io/simon-caignart/suivi-ca-server:latest
     container_name: maille_server
@@ -62,6 +111,9 @@ services:
       traefik.http.routers.maille-web.tls.certresolver: "letsencrypt"
       traefik.http.routers.maille-web.priority: "1"
       traefik.http.services.maille-web.loadbalancer.server.port: "80"
+
+volumes:
+  maille_db_dumps:
 
 networks:
   my-vps-network:
